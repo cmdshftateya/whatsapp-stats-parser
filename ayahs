@@ -1,0 +1,55 @@
+#! /usr/bin/env python3
+import re
+
+def cleaner(filename):
+    # Define the characters to be removed
+    chars_to_remove = ['\u200e', '\u202a', '\u202c', '\xa0']
+
+    # Open the input file and read its contents
+    with open(filename, 'r', encoding='utf-8') as file:
+        input_text = file.read()
+
+    # Remove the specified characters from the input text
+    for char in chars_to_remove:
+        input_text = input_text.replace(char, '')
+
+    # Open the output file and write the modified text to it
+    with open(filename, 'w', encoding='utf-8') as file:
+        file.write(input_text)
+
+def reader(filename):
+    cleaner(filename)
+    
+    # Define a regular expression to match the timestamp, sender, and message
+    pattern = r'\[(\d+/\d+/\d+, \d+:\d+:\d+ [AP]M)\] (.+?): (.*)'
+
+    # Open the text file and read the contents
+    with open(filename, 'r') as file:
+        contents = file.read()
+
+    # Split the contents into individual messages based on the timestamp
+    messages = re.split(r'\n(?=\[\d+/\d+/\d+, \d+:\d+:\d+ [AP]M\])', contents)
+
+    # Initialize an empty list to store the dictionaries for each message
+    message_dicts = []
+
+    # Loop through each message and extract the timestamp, sender, and message
+    for message in messages:
+        match = re.match(pattern, message)
+        if match:
+            timestamp = match.group(1)
+            sender = match.group(2)
+            message_lines = match.group(3).split('\n')
+            message_text = '\n'.join(line.strip() for line in message_lines)
+            message_dicts.append({
+                'timestamp': timestamp,
+                'sender': sender,
+                'message': message_text
+            })
+    
+    return message_dicts
+        
+# Print the list of message dictionaries
+example = reader("mes5.txt")[10:20]
+for x in example:
+    print(x)
