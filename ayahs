@@ -1,6 +1,10 @@
 #! /usr/bin/env python3
+
 import re
 from datetime import datetime
+import csv
+from argparse import ArgumentParser
+
 
 def cleaner(filename):
     # Define the characters to be removed
@@ -35,15 +39,19 @@ def combiner(filename):
 def separator(msgs):
     messages = []
     for msg in msgs:
-        timestamp_str, content = msg.split("] ")
-        date_str, time_str = timestamp_str[1:].split(", ")
-        timestamp = datetime.strptime(date_str, "%m/%d/%y")
-        sender, message = content.split(": ")
-        messages.append({
-            "timestamp": timestamp.strftime("%Y-%m-%d"),
-            "sender": sender,
-            "message": message
-        })
+        try:
+            timestamp_str, content = msg.split("] ")
+            date_str, time_str = timestamp_str[1:].split(", ")
+            timestamp = datetime.strptime(date_str, "%m/%d/%y")
+            sender, message = content.split(": ")
+            messages.append({
+                "timestamp": timestamp.strftime("%Y-%m-%d"),
+                "sender": sender,
+                "message": message
+            })
+        except ValueError:
+            # Skip the message if it has an unexpected format
+            continue
     return messages
 
 def ayah_finder(messages):
@@ -53,12 +61,69 @@ def ayah_finder(messages):
         if ayah_text in message['message']:
             ayah_messages.append(message)
     return ayah_messages
-        
 
-# clean file
-cleaner("mes7.txt")
-messages = combiner("mes7.txt")
-cleaned = separator(messages)
-# ayahs = ayah_finder(messages)
+def msg_splitter(ayahs):
+    for ayah in ayahs:
+        message_parts = ayah['message'].split('\n')
 
-print(cleaned)
+        ayah_info = ""
+        if ',' in message_parts[1]:
+            ayah_info = message_parts[1].split(",")
+        elif ":" in message_parts[1]:
+            ayah_info = message_parts[1].split(":")
+        else:
+            pass
+        # TODO: Change numbering system here to be flexible with all types!
+        surah_name = ayah_info[0]
+        ayah_number = ayah_info[1]
+        arabic = message_parts[3]
+        translation = message_parts[5]
+
+        # redefine ayah['message']
+        ayah['message'] = {
+            "name": surah_name,
+            "number": ayah_number,
+            "arabic": arabic,
+            "english": translation
+        }
+    return ayahs        
+
+def date_format(date):
+    date_string = date
+    date_obj = datetime.strptime(date_string, '%Y-%m-%d')
+    formatted_date = date_obj.strftime('%B %-d')
+    return formatted_date
+
+def ayahs_writer(split_ayahs, filename):
+    with open(filename, 'w', newline='') as f:
+        writer = csv.writer(f)
+        writer.writerow(['Date', 'Surah Name', 'Ayah Number', 'Arabic Text', 'English Text'])
+        for ayah in split_ayahs:
+            date = date_format(ayah['timestamp'])
+            surah = ayah['message']['name']
+            ayah_num = ayah['message']['number']
+            arabic = ayah['message']['arabic']
+            english = ayah['message']['english']
+            writer.writerow([date, surah, ayah_num, arabic, english])
+
+def main():
+    # parser = ArgumentParser()
+    # parser.add_argument('--chat', required=True, type=str, help='File path to exported WhatsApp chat as .txt file.')
+    # parser.add_argument('--outfile', required=True, type=str, help='File path to exported .csv file with ayahs of the day.')
+    # args = parser.parse_args()
+
+    # clean file
+    cleaner("mes8.txt")
+    # combine multi-line messages
+    combined = combiner("mes8.txt")
+    # separate message contents
+    separated = separator(combined)
+    # get ayahs of the day
+    ayahs = ayah_finder(separated)
+    # stratify ayah contents
+    stratified = msg_splitter(ayahs)
+    # write to file
+    ayahs_writer(stratified, "ayahs_to3_21_2023.csv")
+
+if __name__ == '__main__':
+    main()
