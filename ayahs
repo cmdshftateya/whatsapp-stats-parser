@@ -64,11 +64,12 @@ def ayah_finder(messages):
 
 def msg_debugger(ayahs):
     for ayah in ayahs:
-        for x in ayah['message'].split("\n"):
-            if x == "":
-                print("empty")
-            else: 
-                print(x)
+        print(ayah['message'].split("\n"))
+        # for x in ayah['message'].split("\n"):
+        #     if x == "":
+        #         print("empty")
+        #     else: 
+        #         print(x)
 
 def is_english_char(char):
     """
@@ -80,8 +81,48 @@ def is_english_char(char):
         return False
     
 def new_msg_splitter(ayahs):
+    for ayah in ayahs[1:]:
+        # print(ayah["message"])
+        message_parts = ayah['message'].split('\n')
+        # index 0 will always be the date. we do not need this
+        # defining variables for use:
+        surah_name = ""
+        ayah_number = ""
+        arabic = ""
+        english = ""
+        for part in message_parts:
+            # loop to check for surah name line
+            if part == "":
+                pass
+            elif "Sura" in part or part[0].isnumeric():
+                # if the line starts with "Sura", it is the line with the name and number
+                name_number_line = part
+                if ',' in part:
+                    surah_name = name_number_line.split(",")[0]
+                    ayah_number = name_number_line.split(",")[1]
+                elif ":" in part:
+                    surah_name = name_number_line.split(":")[0]
+                    ayah_number = name_number_line.split(":")[1]
+            elif not is_english_char(part[0]):
+                # if the line isn't in english, then it is the quran arabic verse
+                arabic = part
+            elif is_english_char(part[0]):
+                if "Translation" in part or "In this ayah" in part:
+                    pass
+                elif part != "":
+                    english = part
+                else:
+                    pass
+            else:
+                pass
+        ayah['message'] = {
+            "name": surah_name,
+            "number": ayah_number,
+            "arabic": arabic,
+            "english": english
+        }
+        print(ayah['message'])
 
-    
 def msg_splitter(ayahs):
     for ayah in ayahs:
         message_parts = ayah['message'].split('\n')
@@ -149,4 +190,4 @@ def main():
 # if __name__ == '__main__':
 #     main()
 
-msg_debugger(ayah_finder(separator(combiner("mes8.txt"))))
+new_msg_splitter(ayah_finder(separator(combiner("mes8.txt"))))
