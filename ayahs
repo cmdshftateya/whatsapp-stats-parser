@@ -69,6 +69,19 @@ def msg_debugger(ayahs):
                 print("empty")
             else: 
                 print(x)
+
+def is_english_char(char):
+    """
+    Returns True if the given character is in English, False otherwise.
+    """
+    if ord(char) < 128:
+        return True
+    else:
+        return False
+    
+def new_msg_splitter(ayahs):
+
+    
 def msg_splitter(ayahs):
     for ayah in ayahs:
         message_parts = ayah['message'].split('\n')
