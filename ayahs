@@ -80,7 +80,8 @@ def is_english_char(char):
     else:
         return False
     
-def new_msg_splitter(ayahs):
+def msg_splitter(ayahs):
+    output = []
     for ayah in ayahs[1:]:
         # print(ayah["message"])
         message_parts = ayah['message'].split('\n')
@@ -121,10 +122,9 @@ def new_msg_splitter(ayahs):
             "arabic": arabic,
             "english": english
         }
-        print(ayah['message'])
-    return ayahs
-
-     
+        output.append(ayah)
+        # print(ayah['message'])
+    return output  
 
 def date_format(date):
     date_string = date
@@ -137,6 +137,11 @@ def ayahs_writer(split_ayahs, filename):
         writer = csv.writer(f)
         writer.writerow(['Date', 'Surah Name', 'Ayah Number', 'Arabic Text', 'English Text'])
         for ayah in split_ayahs:
+            # print(ayah)
+            if isinstance(ayah, dict):
+                pass
+            else:
+                continue
             date = date_format(ayah['timestamp'])
             surah = ayah['message']['name']
             ayah_num = ayah['message']['number']
@@ -146,25 +151,26 @@ def ayahs_writer(split_ayahs, filename):
 
 def main():
     # TODO: put this back after debugging
-    # parser = ArgumentParser()
-    # parser.add_argument('--chat', required=True, type=str, help='File path to exported WhatsApp chat as .txt file.')
-    # parser.add_argument('--outfile', required=True, type=str, help='File path to exported .csv file with ayahs of the day.')
-    # args = parser.parse_args()
+    parser = ArgumentParser()
+    parser.add_argument('--chat', required=True, type=str, help='File path to exported WhatsApp chat as .txt file.')
+    parser.add_argument('--outfile', required=True, type=str, help='File path to exported .csv file with ayahs of the day.')
+    args = parser.parse_args()
 
     # clean file
-    cleaner("mes8.txt")
+    cleaner(args.chat)
     # combine multi-line messages
-    combined = combiner("mes8.txt")
+    combined = combiner(args.chat)
     # separate message contents
     separated = separator(combined)
     # get ayahs of the day
     ayahs = ayah_finder(separated)
     # stratify ayah contents
     stratified = msg_splitter(ayahs)
+    # print(stratified)
+    # for x in stratified:
+    #     print(x)
     # write to file
-    ayahs_writer(stratified, "ayahs_to3_21_2023.csv")
+    ayahs_writer(stratified, args.outfile)
 
-# if __name__ == '__main__':
-#     main()
-
-new_msg_splitter(ayah_finder(separator(combiner("mes8.txt"))))
+if __name__ == '__main__':
+    main()
