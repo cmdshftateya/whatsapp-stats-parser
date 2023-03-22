@@ -62,6 +62,13 @@ def ayah_finder(messages):
             ayah_messages.append(message)
     return ayah_messages
 
+def msg_debugger(ayahs):
+    for ayah in ayahs:
+        for x in ayah['message'].split("\n"):
+            if x == "":
+                print("empty")
+            else: 
+                print(x)
 def msg_splitter(ayahs):
     for ayah in ayahs:
         message_parts = ayah['message'].split('\n')
@@ -126,5 +133,7 @@ def main():
     # write to file
     ayahs_writer(stratified, "ayahs_to3_21_2023.csv")
 
-if __name__ == '__main__':
-    main()
+# if __name__ == '__main__':
+#     main()
+
+msg_debugger(ayah_finder(separator(combiner("mes8.txt"))))
