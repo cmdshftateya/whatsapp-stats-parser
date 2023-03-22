@@ -122,32 +122,9 @@ def new_msg_splitter(ayahs):
             "english": english
         }
         print(ayah['message'])
+    return ayahs
 
-def msg_splitter(ayahs):
-    for ayah in ayahs:
-        message_parts = ayah['message'].split('\n')
-
-        ayah_info = ""
-        if ',' in message_parts[1]:
-            ayah_info = message_parts[1].split(",")
-        elif ":" in message_parts[1]:
-            ayah_info = message_parts[1].split(":")
-        else:
-            pass
-        # TODO: Change numbering system here to be flexible with all types!
-        surah_name = ayah_info[0]
-        ayah_number = ayah_info[1]
-        arabic = message_parts[3]
-        translation = message_parts[5]
-
-        # redefine ayah['message']
-        ayah['message'] = {
-            "name": surah_name,
-            "number": ayah_number,
-            "arabic": arabic,
-            "english": translation
-        }
-    return ayahs        
+     
 
 def date_format(date):
     date_string = date
