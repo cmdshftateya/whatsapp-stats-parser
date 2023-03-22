@@ -107,6 +107,7 @@ def ayahs_writer(split_ayahs, filename):
             writer.writerow([date, surah, ayah_num, arabic, english])
 
 def main():
+    # TODO: put this back after debugging
     # parser = ArgumentParser()
     # parser.add_argument('--chat', required=True, type=str, help='File path to exported WhatsApp chat as .txt file.')
     # parser.add_argument('--outfile', required=True, type=str, help='File path to exported .csv file with ayahs of the day.')
